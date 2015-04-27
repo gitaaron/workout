@@ -1,0 +1,2 @@
+127.0.0.1 - - [27/Apr/2015:21:21:03 +0000] "GET /users/111 HTTP/1.1" 200 - "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.90 Safari/537.36"
+127.0.0.1 - - [27/Apr/2015:21:21:03 +0000] "GET /favicon.ico HTTP/1.1" 404 24 "http://localhost/users/111" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.90 Safari/537.36"

@@ -2,9 +2,18 @@ var express = require('express');
 var uuid = require('node-uuid');
 var bodyParser = require('body-parser')
 var _ = require('lodash');
+var fs = require('fs');
+
+var morgan = require('morgan');
+
+// create a write stream (in append mode)
+var accessLogStream = fs.createWriteStream(__dirname + '/access.log', {flags: 'a'})
+
 
 var app = express();
 
+// setup the logger
+app.use(morgan('combined', {stream: accessLogStream}))
 
 // create application/json parser 
 var jsonParser = bodyParser.json()
@@ -60,6 +69,24 @@ app.get('/workout/reps/increment', function(req, res) {
     res.end(JSON.stringify({count:++rep_count}));
 });
 
-app.listen(8080);
 
-console.log('listening on 8080');
+function Workout() {
+    this.status = function() {
+        return 'in_progress';
+    }
+    this.remainingActivities = [ 'situps', 'squats'];
+    this.currentActivity = 'pushups';
+    this.remainingReps = 10;
+    this.logRep = function() {
+        if(this.remainingReps = 1) {
+            this.currentActivity = this.remainingActivities.pop();
+        } else {
+            this.remainingReps-=1;
+        }
+
+    }
+}
+
+app.listen(80);
+
+console.log('listening on 80');
