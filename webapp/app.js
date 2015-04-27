@@ -18,6 +18,12 @@ app.use(morgan('combined', {stream: accessLogStream}))
 // create application/json parser 
 var jsonParser = bodyParser.json()
 
+
+app.use(function(req, res, next) {
+    res.setHeader('content-type', 'application/json');
+    next();
+});
+
 // respond with "hello world" when a GET request is made to the homepage
 app.get('/', function(req, res) {
     res.send('hello world');
@@ -46,7 +52,7 @@ app.post('/users', jsonParser, function(req, res) {
     };
 
     users.push(user);
-    res.setHeader('content-type', 'application/json');
+
     res.end(JSON.stringify(user));
 });
 
