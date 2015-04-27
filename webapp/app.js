@@ -26,12 +26,12 @@ app.get('/', function(req, res) {
 
 var users = [
     {
-        id:1,
+        id:'1',
         username:'one',
         phone_number:'111'
     },
     {
-        id:2,
+        id:'2',
         username:'henry',
         phone_number:'+12675064620'
     }
@@ -61,34 +61,100 @@ app.get('/users/:phone_number', function(req, res) {
 
 });
 
-var rep_count = 0;
 
-app.get('/workout', function(req, res) {
-    res.end(JSON.stringify({count:rep_count}));
+var defaultWorkout = new Workout();
+var workouts = {
+    1:defaultWorkout
+};
+
+function respondWithWorkout(res, workout) {
+    res.end(JSON.stringify({
+        activity:workout.currentActivity,
+        total_remaining:workout.totalRemaining(),
+        status:workout.status()
+    }));
+}
+
+app.post('/workouts/:user_id/start', function(req, res) {
+
+    var user = _.find(users, function(user) {
+        return user.id===req.params.user_id
+    });
+
+    if(user) {
+        var workout = new Workout(); 
+        workouts[req.params.user_id] = workout;
+        respondWithWorkout(res, workout);
+    } else { 
+        res.status(404).end('User not found.');
+    }
+
 });
 
-app.get('/workout/reps/clear', function(req, res) {
-    rep_count = 0;
-    res.end(JSON.stringify({count:rep_count}));
+
+app.get('/workouts/:user_id', function(req, res) {
+    var user = _.find(users, function(user) {
+        return user.id===req.params.user_id;
+    }); 
+    if(user) {
+        var workout = workouts[req.params.user_id];
+        if(workout) {
+            respondWithWorkout(res, workout);
+        } else {
+            res.status(404).end('Workout not found.');
+        }    
+    } else {
+        res.status(404).end('User not found.');
+    }
 });
 
-app.get('/workout/reps/increment', function(req, res) {
-    res.end(JSON.stringify({count:++rep_count}));
-});
+app.post('/workouts/:user_id/rep', function(req, res) {
 
+    var user = _.find(users, function(user) {
+        return user.id===req.params.user_id;
+    }); 
+
+    if(user) {
+        var workout = workouts[req.params.user_id];
+        if(workout) {
+            workout.logRep();
+            respondWithWorkout(res, workout);
+        } else {
+            res.status(404).end('Workout not found.');
+        }    
+
+    } else {
+        res.status(404).end('User not found.');
+    }
+
+});
 
 function Workout() {
+    this.repsPerActivity = 3;
     this.status = function() {
-        return 'in_progress';
+        if(this.currentActivity) {
+            return 'in_progress';
+        } else {
+            return 'complete';
+        }
+
+    }
+    this.totalRemaining = function() {
+        if(this.currentActivity) {
+            return this.remainingReps;
+        } else {
+            return undefined;
+        }
     }
     this.remainingActivities = [ 'situps', 'squats'];
     this.currentActivity = 'pushups';
-    this.remainingReps = 10;
+    this.remainingReps = this.repsPerActivity;;
     this.logRep = function() {
-        if(this.remainingReps = 1) {
+        if(this.remainingReps === 1) {
             this.currentActivity = this.remainingActivities.pop();
+            this.remainingReps = this.repsPerActivity;
         } else {
-            this.remainingReps-=1;
+            this.remainingReps--;
         }
 
     }
