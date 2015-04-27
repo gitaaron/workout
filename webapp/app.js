@@ -46,6 +46,7 @@ app.post('/users', jsonParser, function(req, res) {
     };
 
     users.push(user);
+    res.setHeader('content-type', 'application/json');
     res.end(JSON.stringify(user));
 });
 
