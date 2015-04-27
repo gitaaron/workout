@@ -24,11 +24,18 @@ app.get('/', function(req, res) {
 });
 
 
-var users = [{
-    id:1,
-    username:'one',
-    phone_number:111
-}];
+var users = [
+    {
+        id:1,
+        username:'one',
+        phone_number:'111'
+    },
+    {
+        id:2,
+        username:'henry',
+        phone_number:'+12675064620'
+    }
+];
 
 app.post('/users', jsonParser, function(req, res) {
     var id = uuid.v1();
@@ -44,7 +51,7 @@ app.post('/users', jsonParser, function(req, res) {
 
 app.get('/users/:phone_number', function(req, res) {
     var user = _.find(users, function(user) {
-        return user.phone_number===parseInt(req.params.phone_number);
+        return user.phone_number===req.params.phone_number;
     });
     if(user) {
         res.end(JSON.stringify(user));
