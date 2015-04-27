@@ -14,7 +14,11 @@ app.get('/', function(req, res) {
 });
 
 
-var users = [];
+var users = [{
+    id:1,
+    username:'one',
+    phone_number:1    
+}];
 
 app.post('/users', jsonParser, function(req, res) {
     var id = uuid.v1();
