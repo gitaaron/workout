@@ -1,10 +1,31 @@
 var express = require('express');
+var uuid = require('node-uuid');
+var bodyParser = require('body-parser')
 
 var app = express();
+
+
+// create application/json parser 
+var jsonParser = bodyParser.json()
 
 // respond with "hello world" when a GET request is made to the homepage
 app.get('/', function(req, res) {
     res.send('hello world');
+});
+
+
+var users = [];
+
+app.post('/users', jsonParser, function(req, res) {
+    var id = uuid.v1();
+    var user = {
+        id:id,
+        phone_number:req.body.phone_number,
+        username:req.body.username
+    };
+
+    users.push(user);
+    res.end(JSON.stringify(user));
 });
 
 var rep_count = 0;
