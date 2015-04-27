@@ -1,6 +1,7 @@
 var express = require('express');
 var uuid = require('node-uuid');
 var bodyParser = require('body-parser')
+var _ = require('lodash');
 
 var app = express();
 
@@ -17,7 +18,7 @@ app.get('/', function(req, res) {
 var users = [{
     id:1,
     username:'one',
-    phone_number:1    
+    phone_number:111
 }];
 
 app.post('/users', jsonParser, function(req, res) {
@@ -30,6 +31,18 @@ app.post('/users', jsonParser, function(req, res) {
 
     users.push(user);
     res.end(JSON.stringify(user));
+});
+
+app.get('/users/:phone_number', function(req, res) {
+    var user = _.find(users, function(user) {
+        return user.phone_number===parseInt(req.params.phone_number);
+    });
+    if(user) {
+        res.end(JSON.stringify(user));
+    } else {
+        res.status(404).end();
+    }
+
 });
 
 var rep_count = 0;
