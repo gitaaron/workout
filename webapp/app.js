@@ -22,6 +22,6 @@ app.get('/workout/reps/increment', function(req, res) {
     res.end(JSON.stringify({count:++rep_count}));
 });
 
-app.listen(9099);
+app.listen(8080);
 
-console.log('listening on 9099');
+console.log('listening on 8080');
