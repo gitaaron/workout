@@ -18,11 +18,11 @@ var userModel;
 
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function (callback) {
-  console.log("yay");
+  console.log("mongo loaded");
   var userSchema = mongoose.Schema({
-    id: String,
+    userId: String,
     username: String,
-    phone_number: String
+    phoneNumber: String
   });
   userModel = mongoose.model('user', userSchema);
 });
@@ -50,26 +50,25 @@ app.get('/', function(req, res) {
 
 var users = [
     {
-        id:'1',
+        userId:'1',
         username:'one',
-        phone_number:'111'
+        phoneNumber:'111'
     },
     {
-        id:'2',
+        userId:'2',
         username:'henry',
-        phone_number:'+12675064620'
+        phoneNumber:'+12675064620'
     }
 ];
 
 app.post('/users', jsonParser, function(req, res) {
     var id = uuid.v1();
     var user = new userModel({
-        id:id,
-        phone_number:req.body.phone_number,
+        userId:id,
+        phoneNumber:req.body.phoneNumber,
         username:req.body.username
     });
 
-    //users.push(user);
     user.save(function(err,user) {
         if (err) return res.status(503).end();
         res.end(JSON.stringify(user));
@@ -77,7 +76,7 @@ app.post('/users', jsonParser, function(req, res) {
 });
 
 app.get('/users/:phone_number', function(req, res) {
-    userModel.find({phone_number: req.params.phone_number}, function (err, user) {
+    userModel.find({phoneNumber: req.params.phone_number}, function (err, user) {
         if (err) {
             res.status(404).end();
         } 
@@ -87,7 +86,7 @@ app.get('/users/:phone_number', function(req, res) {
         else {
             res.end(JSON.stringify(user));
         }
-    })
+    });
 });
 
 
@@ -106,56 +105,59 @@ function respondWithWorkout(res, workout) {
 
 app.post('/workouts/:user_id/start', function(req, res) {
 
-    var user = _.find(users, function(user) {
-        return user.id===req.params.user_id
+    userModel.find({userId: req.params.user_id}, function (err, user) {
+        if (err) {
+            res.status(404).end('User not found');
+        } 
+        else if (user.length == 0) {
+            res.status(404).end('User not found');
+        }
+        else {
+            var workout = new Workout(); 
+            workouts[req.params.user_id] = workout;
+            respondWithWorkout(res, workout);
+        }
     });
-
-    if(user) {
-        var workout = new Workout(); 
-        workouts[req.params.user_id] = workout;
-        respondWithWorkout(res, workout);
-    } else { 
-        res.status(404).end('User not found.');
-    }
-
 });
 
 
 app.get('/workouts/:user_id', function(req, res) {
-    var user = _.find(users, function(user) {
-        return user.id===req.params.user_id;
-    }); 
-    if(user) {
-        var workout = workouts[req.params.user_id];
-        if(workout) {
-            respondWithWorkout(res, workout);
-        } else {
-            res.status(404).end('Workout not found.');
-        }    
-    } else {
-        res.status(404).end('User not found.');
-    }
+    userModel.find({userId: req.params.user_id}, function (err, user) {
+        if (err) {
+            res.status(404).end('User not found');
+        } 
+        else if (user.length == 0) {
+            res.status(404).end('User not found');
+        }
+        else {
+            var workout = workouts[req.params.user_id];
+            if(workout) {
+                respondWithWorkout(res, workout);
+            } else {
+                res.status(404).end('Workout not found.');
+            }  
+        }
+    });
 });
 
 app.post('/workouts/:user_id/rep', function(req, res) {
-
-    var user = _.find(users, function(user) {
-        return user.id===req.params.user_id;
-    }); 
-
-    if(user) {
-        var workout = workouts[req.params.user_id];
-        if(workout) {
-            workout.logRep();
-            respondWithWorkout(res, workout);
-        } else {
-            res.status(404).end('Workout not found.');
-        }    
-
-    } else {
-        res.status(404).end('User not found.');
-    }
-
+    userModel.find({userId: req.params.user_id}, function (err, user) {
+        if (err) {
+            res.status(404).end('User not found');
+        } 
+        else if (user.length == 0) {
+            res.status(404).end('User not found');
+        }
+        else {
+            var workout = workouts[req.params.user_id];
+            if(workout) {
+                workout.logRep();
+                respondWithWorkout(res, workout);
+            } else {
+                res.status(404).end('Workout not found.');
+            }    
+        }
+    });
 });
 
 function Workout() {
