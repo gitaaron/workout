@@ -64,20 +64,30 @@ var users = [
 app.post('/users', jsonParser, function(req, res) {
     var id = uuid.v1();
     console.log(JSON.stringify(req.body));
-    var user = new userModel({
-        userId:id,
-        phoneNumber:req.body.phoneNumber,
-        username:req.body.username
-    });
 
-    user.save(function(err,user) {
-        if (err) return res.status(503).end();
-        res.end(JSON.stringify(user));
+    userModel.find({phoneNumber: req.body.phoneNumber}, function (err, user) {
+        if (err ) {
+            res.status(503).end();
+        } else if (user.length == 0) {
+            var newuser = new userModel({
+                userId:id,
+                phoneNumber:req.body.phoneNumber,
+                username:req.body.username
+            });
+
+            newuser.save(function(err,user_created) {
+                if (err) return res.status(503).end();
+                res.end(JSON.stringify(user_created));
+            });
+        }
+        else {
+            res.end(JSON.stringify(user));
+        }
     });
 });
 
 app.get('/users/:phone_number', function(req, res) {
-    userModel.findOne({phoneNumber: req.params.phone_number}, function (err, user) {
+    userModel.find({phoneNumber: req.params.phone_number}, function (err, user) {
         if (err) {
             res.status(404).end();
         } 
