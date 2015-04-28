@@ -63,7 +63,7 @@ var users = [
 
 app.post('/users', jsonParser, function(req, res) {
     var id = uuid.v1();
-    console.log(JSON.stringify(req));
+    console.log(JSON.stringify(req.body));
     var user = new userModel({
         userId:id,
         phoneNumber:req.body.phoneNumber,
