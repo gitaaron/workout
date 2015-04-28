@@ -77,7 +77,7 @@ app.post('/users', jsonParser, function(req, res) {
 });
 
 app.get('/users/:phone_number', function(req, res) {
-    userModel.find({phoneNumber: req.params.phone_number}, function (err, user) {
+    userModel.findOne({phoneNumber: req.params.phone_number}, function (err, user) {
         if (err) {
             res.status(404).end();
         } 
