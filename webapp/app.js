@@ -95,7 +95,7 @@ app.get('/users/:phone_number', function(req, res) {
             res.status(404).end();
         }
         else {
-            res.end(JSON.stringify(user));
+            res.end(JSON.stringify(user[0]));
         }
     });
 });
