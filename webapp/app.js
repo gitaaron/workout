@@ -5,10 +5,28 @@ var _ = require('lodash');
 var fs = require('fs');
 
 var morgan = require('morgan');
+var mongoose = require('mongoose');
 
 // create a write stream (in append mode)
 var accessLogStream = fs.createWriteStream(__dirname + '/access.log', {flags: 'a'})
 
+//=========
+// Mongo
+mongoose.connect('mongodb://localhost/workout');
+var db = mongoose.connection;
+var userModel;
+
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function (callback) {
+  console.log("yay");
+  var userSchema = mongoose.Schema({
+    id: String,
+    username: String,
+    phone_number: String
+  });
+  userModel = mongoose.model('user', userSchema);
+});
+//===========
 
 var app = express();
 
@@ -45,27 +63,31 @@ var users = [
 
 app.post('/users', jsonParser, function(req, res) {
     var id = uuid.v1();
-    var user = {
+    var user = new userModel({
         id:id,
         phone_number:req.body.phone_number,
         username:req.body.username
-    };
+    });
 
-    users.push(user);
-
-    res.end(JSON.stringify(user));
+    //users.push(user);
+    user.save(function(err,user) {
+        if (err) return res.status(503).end();
+        res.end(JSON.stringify(user));
+    });
 });
 
 app.get('/users/:phone_number', function(req, res) {
-    var user = _.find(users, function(user) {
-        return user.phone_number===req.params.phone_number;
-    });
-    if(user) {
-        res.end(JSON.stringify(user));
-    } else {
-        res.status(404).end();
-    }
-
+    userModel.find({phone_number: req.params.phone_number}, function (err, user) {
+        if (err) {
+            res.status(404).end();
+        } 
+        else if (user.length == 0) {
+            res.status(404).end();
+        }
+        else {
+            res.end(JSON.stringify(user));
+        }
+    })
 });
 
 

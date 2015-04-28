@@ -1,4 +1,4 @@
 webapp/node_modules/*
 *.swp
 access.log
-
+npm-debug.log
