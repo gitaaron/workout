@@ -24,7 +24,7 @@ db.once('open', function (callback) {
     username: String,
     phoneNumber: String
   });
-  userModel = mongoose.model('user', userSchema);
+  userModel = mongoose.model('users', userSchema);
 });
 //===========
 
@@ -63,6 +63,7 @@ var users = [
 
 app.post('/users', jsonParser, function(req, res) {
     var id = uuid.v1();
+    console.log(JSON.stringify(req));
     var user = new userModel({
         userId:id,
         phoneNumber:req.body.phoneNumber,
