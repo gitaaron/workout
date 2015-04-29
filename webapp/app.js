@@ -29,9 +29,12 @@ db.once('open', function (callback) {
 //===========
 
 var app = express();
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
 
 // setup the logger
 app.use(morgan('combined', {stream: accessLogStream}))
+app.use(express.static(__dirname+'/static'));
 
 // create application/json parser 
 var jsonParser = bodyParser.json()
@@ -69,6 +72,7 @@ app.post('/users', jsonParser, function(req, res) {
         if (err ) {
             res.status(503).end();
         } else if (user.length == 0) {
+            console.log('new_user');
             var newuser = new userModel({
                 userId:id,
                 phoneNumber:req.body.phoneNumber,
@@ -77,11 +81,15 @@ app.post('/users', jsonParser, function(req, res) {
 
             newuser.save(function(err,user_created) {
                 if (err) return res.status(503).end();
+                io.emit('new_user', user_created);
                 res.end(JSON.stringify(user_created));
             });
+
         }
         else {
+            console.log('found_user');
             res.end(JSON.stringify(user));
+            io.emit('new_user', user[0]);
         }
     });
 });
@@ -160,8 +168,10 @@ app.post('/workouts/:user_id/rep', function(req, res) {
             res.status(404).end('User not found');
         }
         else {
+            io.emit('log_rep', user[0]);
             var workout = workouts[req.params.user_id];
             if(workout) {
+
                 workout.logRep();
                 respondWithWorkout(res, workout);
             } else {
@@ -202,6 +212,15 @@ function Workout() {
     }
 }
 
-app.listen(80);
+
+io.on('connection', function (socket) {
+    socket.emit('news', { hello: 'world' });
+    socket.on('my other event', function (data) {
+        console.log(data);
+    });
+});
+
+
+server.listen(80);
 
 console.log('listening on 80');
