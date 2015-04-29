@@ -182,7 +182,7 @@ app.post('/workouts/:user_id/rep', function(req, res) {
 });
 
 function Workout() {
-    this.repsPerActivity = 3;
+    this.repsPerActivity = 5;
     this.status = function() {
         if(this.currentActivity) {
             return 'in_progress';
