@@ -6,7 +6,7 @@
     <body>
         <h1>Hello</h1> 
         <script>
-            var socket = io.connect('http://localhost');
+            var socket = io.connect();
             socket.on('news', function (data) {
                 console.log(data);
                 socket.emit('my other event', { my: 'data' });
